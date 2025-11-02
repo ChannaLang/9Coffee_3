@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', function() {
       </div>
       <div class="modal-body">
         <form id="assignRecipeForm">
+        <input type="text" id="materialSearch" placeholder="Search raw materials..." class="form-control mb-2">
           <input type="hidden" id="recipeProductId" name="product_id">
           <table class="table table-hover" style="color:#ecf0f1;">
             <thead style="background-color:#34495e; color:#f1c40f;">
@@ -75,6 +76,16 @@ recipeBody.innerHTML = rawMaterials.map(mat => `
     </tr>
 `).join('');
 
+    const searchInput = document.getElementById('materialSearch');
+        searchInput.addEventListener('input', function() {
+    const query = this.value.toLowerCase();
+        document.querySelectorAll('#recipeMaterialsBody tr').forEach(row => {
+            const name = row.cells[0].textContent.toLowerCase();
+            row.style.display = name.includes(query) ? '' : 'none';
+    });
+});
+
+
 
         modal.show();
     });
@@ -85,6 +96,7 @@ recipeBody.innerHTML = rawMaterials.map(mat => `
         e.preventDefault();
         const formData = new FormData(recipeForm);
         const productId = recipeProductId.value;
+
 
         try {
             const res = await fetch(`/admin/product/${productId}/add-materials`, {
