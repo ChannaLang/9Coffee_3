@@ -112,6 +112,22 @@ class ProductController extends Controller
                 'message' => 'Recipe updated successfully!'
             ]);
     }
+// Get assigned materials for a product
+public function getAssignedMaterials($id)
+{
+    $product = Product::with('rawMaterials')->findOrFail($id);
+
+    $materials = $product->rawMaterials->map(function($mat) {
+        return [
+            'name' => $mat->name,
+            'quantity_required' => $mat->pivot->quantity_required,
+            'unit' => $mat->unit
+        ];
+    });
+
+    return response()->json($materials);
+}
+
 
     //     public function assignMaterials(Product $product){
     //         $rawMaterials = \App\Models\RawMaterial::all(); // fetch all raw materials

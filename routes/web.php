@@ -102,9 +102,23 @@ Route::middleware(['auth:admin'])->prefix('admin')->group(function () {
     Route::get('/stock', [RawMaterialController::class, 'viewRawMaterials'])
         ->name('admin.raw-material.stock');
 
+    // RAW MATERIAL STOCK ADJUST
+    Route::post('/raw-material/{id}/add-stock', [RawMaterialController::class, 'addStock'])
+        ->name('admin.raw-material.addStock');
+
+    Route::post('/raw-material/{id}/reduce-stock', [RawMaterialController::class, 'reduceStock'])
+        ->name('admin.raw-material.reduceStock');
+
+
+
     // Product + Materials
     Route::post('/product/{product}/add-materials', [ProductController::class, 'addMaterials'])
         ->name('admin.product.addMaterials');
+    Route::get('/admin/product/{id}/get-assigned-materials', [ProductController::class, 'getAssignedMaterials'])
+    ->name('admin.product.getAssignedMaterials');
+
+
+
 
 
 

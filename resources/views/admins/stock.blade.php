@@ -3,7 +3,7 @@
 @section('content')
 <div class="mb-4">
 <button id="btnAddMaterial" class="btn btn-primary" data-url="{{ route('admin.raw-material.store') }}">
-    ➕ Add New Raw Material
+    ➕ Add New Raw ingredient
 </button>
 
 
@@ -11,7 +11,7 @@
 <div class="container-fluid mt-5">
     <div class="card shadow-sm border-0 rounded-4 w-100" style="background-color: #3e2f2f; color: #f5f5f5;">
         <div class="card-header" style="background-color: #db770c; color: #fff;">
-            <h4 class="mb-0">🧾 Raw Material Stock</h4>
+            <h4 class="mb-0">🧾 Raw ingredient stock</h4>
 
         </div>
         <div class="card-body">
@@ -22,7 +22,7 @@
                     <thead style="background-color: #5a3d30;" class="text-center">
                         <tr>
                             <th>#</th>
-                            <th>Raw Material</th>
+                            <th>Raw ingredient</th>
                             <th>Quantity</th>
                             <th>Unit</th>
                             <th>Status</th>
@@ -33,54 +33,65 @@
                     <tbody class="text-center">
                       @foreach($rawMaterials as $material)
 <tr>
-    <td>{{ $material->id }}</td>
-    <td>{{ $material->name }}</td>
+
 @php
     $displayQty = $material->quantity;
     $displayUnit = $material->unit;
 
-    if ($displayUnit == 'g' && $displayQty >= 1000) {
-        $displayQty = $displayQty / 1000;
-        $displayUnit = 'kg';
-    }
+    // if ($displayUnit == 'g' && $displayQty >= 1000) {
+    //     $displayQty = $displayQty / 1000;
+    //     $displayUnit = 'kg';
+    // }
 
-    if ($displayUnit == 'ml' && $displayQty >= 1000) {
-        $displayQty = $displayQty / 1000;
-        $displayUnit = 'L';
-    }
+    // if ($displayUnit == 'ml' && $displayQty >= 1000) {
+    //     $displayQty = $displayQty / 1000;
+    //     $displayUnit = 'L';
+    // }
 @endphp
+<td id="displayId{{ $material->id }}">{{ $material->id }}</td>
+<td id="displayName{{ $material->id }}">{{ $material->name }}</td>
+<td id="displayQty{{ $material->id }}">{{ number_format($displayQty, 2) }}</td>
+<td id="displayUnit{{ $material->id }}">{{ $material->unit }}</td>
 
-<td>{{ number_format($displayQty, 2) }}</td>
-<td>{{ $displayUnit }}</td>
+
 
     <td>
         <span class="badge {{ $material->quantity < 5 ? 'bg-danger' : 'bg-success' }}">
             {{ $material->quantity < 5 ? 'Low' : 'OK' }}
         </span>
     </td>
-    <td>
-<form action="{{ route('admin.raw-material.update', $material->id) }}" method="POST">
-    @csrf
-    @method('PATCH')
-    <input
-        type="text"
-        name="quantity"
-        value="{{ $material->quantity }}"
-        inputmode="decimal"
-        class="form-control"
-        style="width:80px; display:inline-block;"
-    >
-    <button type="submit" class="btn btn-sm btn-primary">Update</button>
-</form>
+            <td>
+                <button
+                    class="btn btn-success btnAddStock"
+                    data-id="{{ $material->id }}"
+                    data-name="{{ $material->name }}"
+                    data-unit="{{ $material->unit }}"
+                >➕ Add</button>
 
-    <!-- Delete button only if quantity = 0 -->
-        <form action="{{ route('admin.raw-material.destroy', $material->id) }}" method="POST" style="display:inline-block;">
-            @csrf
-            @method('DELETE')
-            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Are you sure you want to delete this material?');">Delete
-            </button>
-        </form>
-    </td>
+                <button
+                    class="btn btn-warning btnReduceStock"
+                    data-id="{{ $material->id }}"
+                    data-name="{{ $material->name }}"
+                    data-unit="{{ $material->unit }}"
+                >➖ Reduce</button>
+
+                <button
+                    class="btn btn-primary btnUpdateMaterial"
+                    data-id="{{ $material->id }}"
+                    data-name="{{ $material->name }}"
+                    data-unit="{{ $material->unit }}"
+                >🔄 Update</button>
+
+
+                <button
+                    type="button"
+                    class="btn btn-sm btn-danger btnDeleteMaterial"
+                    data-id="{{ $material->id }}"
+                    data-name="{{ $material->name }}"
+                >🗑 Delete</button>
+
+            </td>
+
 </tr>
 @endforeach   </tbody>
                 </table>

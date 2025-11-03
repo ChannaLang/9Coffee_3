@@ -90,6 +90,12 @@
                                         data-product-id="{{ $product->id }}">
                                         Assign Recipe
                                     </button>
+                                    <button class="btn btn-sm btn-info btnViewRecipe"
+                                            data-url="{{ route('admin.product.getAssignedMaterials', $product->id) }}">
+                                        View Assigned
+                                    </button>
+
+
                                 </td>
                           </tr>
                             @php $counter++; @endphp
@@ -106,7 +112,7 @@
 </div>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="{{ asset('assets/js/assign-recipe.js') }}"></script>
-
+<script src="/js/assigned-recipe.js"></script>
 
 {{-- SweetAlert --}}
 <script src="{{ asset('assets/js/all-product.js') }}"></script>

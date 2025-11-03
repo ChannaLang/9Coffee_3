@@ -11,67 +11,32 @@ use App\Models\Product\Order;
 class RawMaterialController extends Controller
 {
     // Show the form to create a new raw material
-    public function create()
-    {
-        return view('admins.create_raw_material'); // create this Blade view
-    }
+
     public function list() {
         return response()->json(RawMaterial::all(['id','name','quantity','unit']));
     }
 
 
     // Store the new raw material in the database
-    public function store(Request $request)
+public function store(Request $request)
 {
-        $request->validate([
-            'name' => 'required|max:100|unique:raw_materials,name',
-            'quantity' => 'required|numeric|min:0',
-            'unit' => 'required|string|max:10',
-        ]);
-
-        // Convert to base units
-        $quantity = $request->quantity;
-        $unit     = $request->unit;
-
-        switch ($unit) {
-            case 'kg':
-                $quantity = $quantity * 1000;
-                $unit = 'g';
-                break;
-
-            case 'g':
-                $unit = 'g';
-                break;
-
-            case 'l':
-                $quantity = $quantity * 1000;
-                $unit = 'ml';
-                break;
-
-            case 'ml':
-                $unit = 'ml';
-                break;
-
-            default:
-                $unit = 'pcs';
-    }
-
-    RawMaterial::create([
-        'name' => $request->name,
-        'quantity' => $quantity, // ✅ use converted
-        'unit' => $unit,         // ✅ use converted
+    $request->validate([
+        'id' => 'required|integer|unique:raw_materials,id',
+        'name' => 'required|string|max:100',
+        'unit' => 'required|string|max:10',
     ]);
 
-    return redirect()->route('admin.raw-material.stock')->with('success', 'Raw material added successfully!');
+    $material = RawMaterial::create([
+        'id' => $request->id,
+        'name' => $request->name,
+        'quantity' => $request->quantity ?? 0,
+        'unit' => $request->unit,
+    ]);
+
+    // Return JSON instead of redirect
+    return response()->json($material);
 }
 
-
-    // Show all raw materials
-    public function index()
-    {
-        $rawMaterials = RawMaterial::orderBy('id', 'asc')->get();
-        return view('admins.stock', compact('rawMaterials'));
-    }
 
     // Update raw material quantity
     public function update(Request $request, $id)
@@ -86,6 +51,16 @@ class RawMaterialController extends Controller
 
         return redirect()->route('admin.raw-material.stock')->with('success', 'Stock updated successfully!');
     }
+
+
+    // Show all raw materials
+    public function index()
+    {
+        $rawMaterials = RawMaterial::orderBy('id', 'asc')->get();
+        return view('admins.stock', compact('rawMaterials'));
+    }
+
+
 
     // Place an order using raw materials
     public function orderProduct(Request $request)
@@ -117,9 +92,8 @@ class RawMaterialController extends Controller
 // Show raw material stock
 public function viewRawMaterials()
 {
-    $rawMaterials = RawMaterial::orderBy('id', 'asc')->get();
-    $totalStock = $rawMaterials->sum('quantity'); // total available stock
-    return view('admins.stock', compact('rawMaterials', 'totalStock'));
+    $rawMaterials = \App\Models\RawMaterial::orderBy('id', 'asc')->get();
+    return view('admins.stock', compact('rawMaterials'));
 }
 
 
@@ -128,15 +102,27 @@ public function viewRawMaterials()
 public function updateRawMaterial(Request $request, $id)
 {
     $request->validate([
-        'quantity' => 'required|integer|min:0',
+        'name' => 'required|string|max:100',
+        'unit' => 'required|string|max:10',
+        'new_id' => 'nullable|integer|unique:raw_materials,id',
     ]);
 
     $material = RawMaterial::findOrFail($id);
-    $material->quantity = $request->quantity;
+
+    // Update name and unit
+    $material->name = $request->name;
+    $material->unit = $request->unit;
+
+    // Update ID if provided and unique
+    if ($request->has('new_id')) {
+        $material->id = $request->new_id;
+    }
+
     $material->save();
 
-    return redirect()->route('admin.raw-material.stock')->with('success', 'Stock updated successfully!');
+    return response()->json($material);
 }
+
 public function destroy($id)
 {
     $material = RawMaterial::findOrFail($id);
@@ -149,6 +135,36 @@ public function destroy($id)
 
     return redirect()->back()->with('success', 'Material deleted successfully!');
 }
+public function addStock(Request $request, $id)
+{
+    $material = RawMaterial::findOrFail($id);
+
+    // convert to base unit if needed
+    $qty = floatval($request->quantity);
+
+    $material->quantity += $qty;
+    $material->save();
+
+    return redirect()->back()->with('success', 'Stock added successfully!');
+}
+
+public function reduceStock(Request $request, $id)
+{
+    $material = RawMaterial::findOrFail($id);
+
+    $qty = floatval($request->quantity);
+
+    if ($qty > $material->quantity) {
+        return redirect()->back()->with('error', 'Not enough stock to reduce!');
+    }
+
+    $material->quantity -= $qty;
+    $material->save();
+
+    return redirect()->back()->with('success', 'Stock reduced successfully!');
+}
+
+
 
 
 }
