@@ -11,13 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-       Schema::create('raw_materials', function (Blueprint $table) {
-    $table->id();
+Schema::create('raw_materials', function (Blueprint $table) {
+    $table->integer('id')->primary(); // manual ID, signed INT
     $table->string('name')->unique();
-    $table->decimal('quantity', 8, 2)->default(0); // in grams, liters, etc.
-    $table->string('unit')->default('unit');       // e.g., g, ml, pcs
+    $table->decimal('quantity', 8, 2)->default(0);
+    $table->string('unit')->default('unit');
     $table->timestamps();
 });
+
+
 
     }
 

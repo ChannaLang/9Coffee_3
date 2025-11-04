@@ -11,13 +11,18 @@ return new class extends Migration
      */
     public function up(): void
     {
-  Schema::create('product_raw_material', function (Blueprint $table) {
+Schema::create('product_raw_material', function (Blueprint $table) {
     $table->id();
-    $table->foreignId('product_id')->constrained()->onDelete('cascade');
-    $table->foreignId('raw_material_id')->constrained()->onDelete('cascade');
-    $table->decimal('quantity_required', 8, 2); // ✅ allows decimals like 0.5
+    $table->foreignId('product_id')->constrained()->onDelete('cascade'); // stays bigint unsigned
+    $table->integer('raw_material_id'); // signed INT to match raw_materials.id
+    $table->foreign('raw_material_id')
+          ->references('id')
+          ->on('raw_materials')
+          ->onDelete('cascade');
+    $table->decimal('quantity_required', 8, 2);
     $table->timestamps();
 });
+
 
     }
 

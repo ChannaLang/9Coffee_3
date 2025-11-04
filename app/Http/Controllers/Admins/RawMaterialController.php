@@ -38,19 +38,6 @@ public function store(Request $request)
 }
 
 
-    // Update raw material quantity
-    public function update(Request $request, $id)
-    {
-        $request->validate([
-           'quantity' => 'required|numeric|min:0',
-        ]);
-
-        $material = RawMaterial::findOrFail($id);
-        $material->quantity = $request->quantity;
-        $material->save();
-
-        return redirect()->route('admin.raw-material.stock')->with('success', 'Stock updated successfully!');
-    }
 
 
     // Show all raw materials

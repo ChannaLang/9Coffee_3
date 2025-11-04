@@ -81,84 +81,80 @@ document.addEventListener("DOMContentLoaded", () => {
             });
         }
 
-        if (btnUpdateMaterial) {
-            btnUpdateMaterial.addEventListener('click', () => {
-                const id = btnUpdateMaterial.dataset.id;
-                const name = btnUpdateMaterial.dataset.name;
-                const unit = btnUpdateMaterial.dataset.unit;
+if (btnUpdateMaterial) {
+    btnUpdateMaterial.addEventListener('click', () => {
+        const id = btnUpdateMaterial.dataset.id;
+        const name = btnUpdateMaterial.dataset.name;
+        const unit = btnUpdateMaterial.dataset.unit;
 
-                Swal.fire({
-                    title: 'Update Raw Ingredient',
-                    html: `
-                        <input type="number" id="update_id" class="swal2-input" placeholder="ID" value="${id}">
-                        <input type="text" id="update_name" class="swal2-input" placeholder="Material Name" value="${name}">
-                        <select id="update_unit" class="swal2-input">
-                            <option value="g" ${unit === 'g' ? 'selected' : ''}>Gram (g)</option>
-                            <option value="ml" ${unit === 'ml' ? 'selected' : ''}>Milliliter (ml)</option>
-                            <option value="pcs" ${unit === 'pcs' ? 'selected' : ''}>Pieces (pcs)</option>
-                        </select>
-                    `,
-                    confirmButtonText: 'Update',
-                    showCancelButton: true,
-                    preConfirm: () => {
-                        const newId = parseInt(document.getElementById('update_id').value);
-                        const newName = document.getElementById('update_name').value.trim();
-                        const newUnit = document.getElementById('update_unit').value;
+        Swal.fire({
+            title: 'Update Raw Ingredient',
+            html: `
+                <input type="number" id="update_id" class="swal2-input" placeholder="ID" value="${id}">
+                <input type="text" id="update_name" class="swal2-input" placeholder="Material Name" value="${name}">
+                <select id="update_unit" class="swal2-input">
+                    <option value="g" ${unit === 'g' ? 'selected' : ''}>Gram (g)</option>
+                    <option value="ml" ${unit === 'ml' ? 'selected' : ''}>Milliliter (ml)</option>
+                    <option value="pcs" ${unit === 'pcs' ? 'selected' : ''}>Pieces (pcs)</option>
+                </select>
+            `,
+            confirmButtonText: 'Update',
+            showCancelButton: true,
+            preConfirm: () => {
+                const newId = parseInt(document.getElementById('update_id').value);
+                const newName = document.getElementById('update_name').value.trim();
+                const newUnit = document.getElementById('update_unit').value;
 
-                        if (!newId || newId <= 0) {
-                            Swal.showValidationMessage('Please enter a valid ID');
-                            return false;
-                        }
-                        if (!newName) {
-                            Swal.showValidationMessage('Please enter a material name');
-                            return false;
-                        }
+                if (!newId || newId <= 0) Swal.showValidationMessage('Please enter a valid ID');
+                if (!newName) Swal.showValidationMessage('Please enter a material name');
 
-                        return { newId, newName, newUnit };
-                    }
-                }).then(result => {
-                    if (result.isConfirmed) {
-                        const { newId, newName, newUnit } = result.value;
+                return { newId, newName, newUnit };
+            }
+        }).then(result => {
+            if (!result.isConfirmed) return;
 
-                        fetch(`/admin/raw-material/update/${id}`, {
-                            method: 'PATCH',
-                            headers: {
-                                'Content-Type': 'application/json',
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                            },
-                            body: JSON.stringify({ new_id: newId, name: newName, unit: newUnit })
-                        })
-                        .then(res => {
-                            if (!res.ok) throw new Error('Update failed');
-                            return res.json();
-                        })
-                        .then(data => {
-                            // Update table row
-                            const row = btnUpdateMaterial.closest('tr');
-                            row.children[0].textContent = data.id; // ID
-                            const nameCell = row.querySelector(`[id^='displayName']`);
-                            const unitCell = row.querySelector(`[id^='displayUnit']`);
+            const { newId, newName, newUnit } = result.value;
 
-                            nameCell.id = `displayName${data.id}`;
-                            nameCell.textContent = data.name;
+            // Only send new_id if it has changed
+            const payload = { name: newName, unit: newUnit };
+            if (newId !== parseInt(id)) payload.new_id = newId;
 
-                            unitCell.id = `displayUnit${data.id}`;
-                            unitCell.textContent = data.unit;
+            fetch(`/admin/raw-material/update/${id}`, {
+                method: 'PATCH',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                },
+                body: JSON.stringify(payload)
+            })
+            .then(res => {
+                if (!res.ok) throw new Error('Update failed');
+                return res.json();
+            })
+            .then(data => {
+                const row = btnUpdateMaterial.closest('tr');
 
-                            // Update dataset for buttons
-                            row.querySelectorAll('button').forEach(button => {
-                                button.dataset.id = data.id;
-                                button.dataset.name = data.name;
-                                button.dataset.unit = data.unit;
-                            });
+                // Update table row
+                row.cells[0].textContent = data.id;
+                row.cells[1].textContent = data.name;
+                row.cells[1].id = `displayName${data.id}`;
+                row.cells[3].textContent = data.unit;
+                row.cells[3].id = `displayUnit${data.id}`;
 
-                            Swal.fire('Success', 'Ingredient updated!', 'success');
-                        })
-                        .catch(err => Swal.fire('Error', err.message, 'error'));
-                    }
+                // Update dataset for buttons
+                row.querySelectorAll('button').forEach(button => {
+                    button.dataset.id = data.id;
+                    button.dataset.name = data.name;
+                    button.dataset.unit = data.unit;
                 });
-            });
-        }
+
+                Swal.fire('Success', 'Ingredient updated!', 'success');
+            })
+            .catch(err => Swal.fire('Error', err.message, 'error'));
+        });
+    });
+}
+
          // --- Delete Material ---
         if (btnDeleteMaterial) {
             btnDeleteMaterial.addEventListener('click', () => {
