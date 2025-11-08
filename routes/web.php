@@ -145,9 +145,9 @@ Route::middleware(['auth:admin'])->prefix('admin')->group(function () {
     // Products management
     Route::get('/all-products', [ProductController::class, 'DisplayProducts'])->name('all.products');
     Route::get('/create-products', [ProductController::class, 'CreateProducts'])->name('create.products');
+    Route::post('/store-products', [ProductController::class, 'StoreProducts'])->name('store.products');
     Route::post('/edit-products/{id}', [ProductController::class, 'AjaxUpdateProducts'])->name('ajax.edit.products');
     Route::post('/update-products/{id}', [ProductController::class, 'UpdateProducts'])->name('update.products');
-    Route::post('/store-products', [ProductController::class, 'StoreProducts'])->name('store.products');
     Route::delete('/delete-products/{id}', [ProductController::class, 'DeleteProducts'])->name('ajax.delete.products');
 
     // Bookings management

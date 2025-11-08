@@ -4,6 +4,8 @@
 <div class="row">
     <div class="col">
         {{-- CSRF Token for AJAX --}}
+        <meta name="store-products-url" content="{{ route('store.products') }}">
+
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
         <div class="card shadow-sm rounded-4" style="background-color: #3e2f2f; color: #f5f5f5; border:1px solid #6b4c3b;">
@@ -24,10 +26,8 @@
                     </p>
                 @endif
 
-                <div class="d-flex justify-content-between align-items-center mb-3">
-                    <h5 class="card-title mb-0">All Products</h5>
-                    <a href="{{ route('create.products') }}" class="btn btn-warning text-dark">Create Product</a>
-                </div>
+<button id="btnCreateProduct" class="btn btn-warning text-dark">Create Product</button>
+
 
                 {{-- Products Table --}}
                 <div class="table-responsive">
@@ -110,6 +110,7 @@
         </div>
     </div>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="{{ asset('assets/js/assign-recipe.js') }}"></script>
 <script src="/js/assigned-recipe.js"></script>
@@ -121,6 +122,7 @@
 
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="{{ asset('assets/js/store-product.js') }}"></script>
 
 {{-- CSRF Setup --}}
 <script>

@@ -31,25 +31,25 @@ class ProductController extends Controller
         ]);
 
         $descriptionPath = public_path('assets/images');
+        if (!file_exists($descriptionPath)) {
+            mkdir($descriptionPath, 0775, true);
+        }
 
-                if (!file_exists($descriptionPath)) {
-            mkdir($descriptionPath, 0775, true);}
         $myimage = time() . '_' . $request->image->getClientOriginalName();
         $request->image->move($descriptionPath, $myimage);
 
-
-        Product::create([
+        $product = Product::create([
             'name' => $request->name,
             'price' => $request->price,
             'image' => $myimage,
             'description' => $request->description,
             'type' => $request->type,
-            'quantity' => $request->quantity ?? 0,
+
         ]);
 
-        return Redirect::route('all.products')
-            ->with(['success' => "Product created successfully!"]);
+        return response()->json(['success' => true, 'product' => $product]);
     }
+
 
     public function DeleteProducts($id){
         $product = Product::find($id);
@@ -112,27 +112,24 @@ class ProductController extends Controller
                 'message' => 'Recipe updated successfully!'
             ]);
     }
-// Get assigned materials for a product
-public function getAssignedMaterials($id)
-{
-    $product = Product::with('rawMaterials')->findOrFail($id);
-
-    $materials = $product->rawMaterials->map(function($mat) {
-        return [
-            'name' => $mat->name,
-            'quantity_required' => $mat->pivot->quantity_required,
-            'unit' => $mat->unit
-        ];
-    });
-
-    return response()->json($materials);
-}
 
 
-    //     public function assignMaterials(Product $product){
-    //         $rawMaterials = \App\Models\RawMaterial::all(); // fetch all raw materials
-    //         return view('admins.assign_materials', compact('product', 'rawMaterials'));
-    // }
+        // Get assigned materials for a product
+            public function getAssignedMaterials($id)
+            {
+                $product = Product::with('rawMaterials')->findOrFail($id);
+
+                $materials = $product->rawMaterials->map(function($mat) {
+                    return [
+                        'name' => $mat->name,
+                        'quantity_required' => $mat->pivot->quantity_required,
+                        'unit' => $mat->unit
+                    ];
+                });
+
+                return response()->json($materials);
+            }
+
 
 
 
